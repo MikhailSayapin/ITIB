@@ -6,21 +6,14 @@
 
 using namespace std;
 
-const int COUNT_OF_ARGS = 3;
+const int COUNT_OF_ARGS = 4;
+
+void print_y(Neuron& neuron);
+void print_era(Neuron& neuron);
 
 int f(vector<int> &x)
 {
 	return !((x[0] || x[1] || x[2]) && (x[1] || x[2] || x[3]));
-}
-
-int test_f(vector<int>& x)
-{
-	return !(((!(x[1]) || x[3]) && x[0]) || (x[0] && x[2]));
-}
-
-int test2_f(vector<int>& x)
-{
-	return x[0] && x[1] && x[2];
 }
 
 void increment(vector<int> &x)
@@ -34,28 +27,52 @@ void increment(vector<int> &x)
 		x[i] = 1;
 }
 
-void calculation(Neuron &neuron)
+void calculation(Neuron &neuron, bool is_logistic)
 {
 	while (true)
 	{
+		cout << "Y = (";
 		vector<int> args(COUNT_OF_ARGS, 0);
-		for (int i = 0; i < pow(2, COUNT_OF_ARGS); i++) //Ð¦Ð¸ÐºÐ» Ð²Ð½ÑƒÑ‚Ñ€Ð¸ ÑÐ¿Ð¾Ñ…Ð¸
+		for (int i = 0; i < pow(2, COUNT_OF_ARGS); i++) //Öèêë âíóòðè ýïîõè
 		{
+			neuron.set_new_x(args);
 			neuron.set_net();
-			neuron.set_y();
-			neuron.set_sigma(test2_f(args));
-			neuron.set_new_w(args);
+			if (is_logistic) neuron.set_logistic_y();
+			else neuron.set_step_y();
+			neuron.set_sigma(f(args));
+			neuron.set_new_w(args, is_logistic);
 
 			increment(args);
+			print_y(neuron);
 		}
+
+		print_era(neuron);
 
 		if (neuron.get_E() == 0) break;
 		neuron.set_E_to_zero();
 	}
 }
 
+void print_y(Neuron &neuron)
+{
+	cout << neuron.get_y() << ",";
+}
+
+void print_era(Neuron& neuron)
+{
+	cout << ");	W = (";
+	for (auto el : neuron.get_w())
+		cout << el << ",";
+	cout << "); E = " << neuron.get_E() << endl;
+}
+
 int main()
 {
 	Neuron neuron(COUNT_OF_ARGS);
-	calculation(neuron);
+	calculation(neuron, false);
+
+	cout << endl << endl;
+
+	Neuron neuron2(COUNT_OF_ARGS);
+	calculation(neuron2, true);
 }
